@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Candle — Sacred Frequency Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber: #C08030;
+    --amber-light: #E8A84A;
+    --amber-dim: #7A4F1A;
+    --smoke: #F5EFE6;
+    --obsidian: #0D0B08;
+    --deep: #12100D;
+    --mid: #1E1A14;
+    --surface: #26211A;
+    --rim: #3A3028;
+    --glow: rgba(192,128,48,0.15);
+    --glow-strong: rgba(232,168,74,0.35);
+    --amber-glow: rgba(192,128,48,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--obsidian);
+    color: var(--smoke);
+    font-family: 'Crimson Text', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Subtle grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--rim);
+    position: relative;
+  }
+
+  .flame-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  canvas#flameCanvas {
+    display: block;
+  }
+
+  .wordmark {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.45em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 36px;
+    color: var(--smoke);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: rgba(245,239,230,0.5);
+    letter-spacing: 0.03em;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--rim);
+    transition: all 0.4s ease;
+  }
+  .status-dot.active {
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .status-text {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: rgba(245,239,230,0.4);
+    transition: color 0.4s;
+  }
+  .status-text.active { color: var(--amber); }
+
+  /* Section labels */
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rim);
+  }
+
+  /* FREQUENCY GRID */
+  .freq-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .freq-card {
+    background: var(--surface);
+    border: 1px solid var(--rim);
+    border-radius: 4px;
+    padding: 14px 10px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .freq-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 100%, var(--glow-strong), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .freq-card:hover { border-color: var(--amber-dim); }
+  .freq-card.active {
+    border-color: var(--amber);
+    background: var(--mid);
+    box-shadow: 0 0 20px var(--glow), inset 0 0 20px rgba(192,128,48,0.05);
+  }
+  .freq-card.active::before { opacity: 1; }
+
+  .freq-hz {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--amber-light);
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .freq-note {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    font-style: italic;
+    color: rgba(245,239,230,0.45);
+    display: block;
+    margin-bottom: 4px;
+    min-height: 14px;
+  }
+
+  .freq-name {
+    font-family: 'Crimson Text', serif;
+    font-size: 12px;
+    color: rgba(245,239,230,0.7);
+    display: block;
+    line-height: 1.3;
+  }
+
+  /* LAYERS */
+  .layers-panel {
+    background: var(--mid);
+    border: 1px solid var(--rim);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .layer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rim);
+  }
+  .layer-row:last-child { border-bottom: none; }
+
+  .layer-toggle {
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--rim);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+    border: none;
+  }
+  .layer-toggle.on { background: var(--amber-dim); }
+  .layer-toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(245,239,230,0.5);
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s ease;
+  }
+  .layer-toggle.on::after {
+    left: 19px;
+    background: var(--amber-light);
+  }
+
+  .layer-info {
+    flex: 1;
+  }
+
+  .layer-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--smoke);
+    font-weight: 600;
+  }
+
+  .layer-desc {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(245,239,230,0.4);
+  }
+
+  .layer-vol {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .vol-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--amber-dim);
+    width: 22px;
+    text-align: right;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 90px;
+    height: 2px;
+    background: var(--rim);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(192,128,48,0.5);
+  }
+
+  /* BINAURAL */
+  .binaural-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .binaural-beat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 12px 6px 8px;
+    border: 1px solid var(--rim);
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+  .binaural-beat:hover { border-color: var(--amber-dim); }
+  .binaural-beat.active {
+    border-color: var(--amber);
+    background: rgba(192,128,48,0.08);
+  }
+
+  .beat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rim);
+    transition: all 0.2s;
+  }
+  .binaural-beat.active .beat-dot {
+    background: var(--amber);
+    box-shadow: 0 0 6px var(--amber);
+  }
+
+  .beat-label {
+    font-family: 'Crimson Text', serif;
+    font-size: 13px;
+    color: rgba(245,239,230,0.6);
+  }
+
+  .beat-hz {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--amber-dim);
+  }
+
+  /* WAVEFORM SELECT */
+  .wave-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .wave-btn {
+    padding: 5px 14px;
+    border: 1px solid var(--rim);
+    border-radius: 20px;
+    background: transparent;
+    color: rgba(245,239,230,0.5);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .wave-btn:hover { border-color: var(--amber-dim); color: var(--smoke); }
+  .wave-btn.active {
+    border-color: var(--amber);
+    color: var(--amber-light);
+    background: rgba(192,128,48,0.06);
+  }
+
+  /* MAIN CONTROLS */
+  .controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 32px 0 24px;
+    flex-wrap: wrap;
+  }
+
+  .btn-play {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 1.5px solid var(--amber);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-play::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow-strong), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-play:hover::before { opacity: 1; }
+  .btn-play:hover { box-shadow: 0 0 24px var(--glow-strong); }
+  .btn-play.playing { box-shadow: 0 0 32px var(--glow-strong); }
+  .btn-play svg { position: relative; z-index: 1; }
+
+  .master-vol-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .master-vol-wrap span {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--amber-dim);
+  }
+  .master-vol-wrap input[type=range] { width: 120px; }
+
+  /* VISUALIZER */
+  #vizCanvas {
+    display: block;
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 32px;
+    border: 1px solid var(--rim);
+  }
+
+  /* SUNO PROMPTS */
+  .suno-section {
+    margin-top: 40px;
+  }
+
+  .suno-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--rim);
+  }
+
+  .suno-tab {
+    padding: 8px 18px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: rgba(245,239,230,0.35);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .suno-tab:hover { color: rgba(245,239,230,0.6); }
+  .suno-tab.active {
+    color: var(--amber-light);
+    border-bottom-color: var(--amber);
+  }
+
+  .suno-content {
+    background: var(--mid);
+    border: 1px solid var(--rim);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 20px;
+    display: none;
+  }
+  .suno-content.active { display: block; }
+
+  .prompt-box {
+    background: var(--surface);
+    border: 1px solid var(--rim);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .prompt-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .prompt-text {
+    font-family: 'Crimson Text', serif;
+    font-size: 14px;
+    color: var(--smoke);
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--rim);
+    border: none;
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: rgba(245,239,230,0.5);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--amber-dim); color: var(--smoke); }
+  .copy-btn.copied { background: var(--amber); color: var(--obsidian); }
+
+  /* GRID DIVIDER */
+  .grid-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--rim), transparent);
+    margin: 32px 0;
+  }
+
+  .info-note {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(245,239,230,0.35);
+    text-align: center;
+    line-height: 1.6;
+    margin-top: 20px;
+  }
+
+  /* Selected freq display */
+  .selected-display {
+    text-align: center;
+    margin-bottom: 20px;
+    height: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sel-hz {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 300;
+    color: var(--amber-light);
+    line-height: 1;
+    letter-spacing: 0.04em;
+  }
+  .sel-name {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(245,239,230,0.45);
+    letter-spacing: 0.05em;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .panel {
+    background: var(--mid);
+    border: 1px solid var(--rim);
+    border-radius: 6px;
+    padding: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .freq-grid { grid-template-columns: repeat(3, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    h1 { font-size: 26px; }
+  }
+
+  /* ── WARNING MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,8,5,0.92);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+  .modal-overlay.dismissed {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .modal {
+    background: var(--mid);
+    border: 1px solid var(--rim);
+    border-top: 3px solid var(--amber);
+    border-radius: 6px;
+    max-width: 540px;
+    width: 100%;
+    padding: 36px 32px 28px;
+    position: relative;
+  }
+
+  .modal-flame {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 4px;
+  }
+
+  .modal-wordmark {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.45em;
+    color: var(--amber);
+    text-align: center;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .modal h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--smoke);
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rim);
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  .warning-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .warning-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    width: 20px;
+    text-align: center;
+  }
+
+  .warning-text {
+    font-family: 'Crimson Text', serif;
+    font-size: 15px;
+    color: rgba(245,239,230,0.65);
+    line-height: 1.55;
+  }
+
+  .warning-text strong {
+    color: var(--smoke);
+    font-weight: 400;
+  }
+
+  .modal-disclaimer {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(245,239,230,0.28);
+    line-height: 1.55;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rim);
+    text-align: center;
+  }
+
+  .modal-btn {
+    display: block;
+    width: 100%;
+    margin-top: 22px;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid var(--amber);
+    border-radius: 4px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--amber-light);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+  }
+  .modal-btn:hover {
+    background: var(--amber-glow, rgba(192,128,48,0.1));
+    box-shadow: 0 0 16px rgba(192,128,48,0.15);
+  }
+
+  .modal-secondary {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--amber-dim);
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .modal-secondary:hover { color: var(--smoke); }
+
+  /* ── PERSISTENT DISCLAIMER STRIP ── */
+  .disclaimer-strip {
+    background: var(--deep);
+    border-top: 1px solid var(--rim);
+    padding: 14px 24px;
+    text-align: center;
+    margin-top: 48px;
+  }
+
+  .disclaimer-strip p {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(245,239,230,0.25);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .disclaimer-strip a {
+    color: var(--amber-dim);
+    text-decoration: none;
+  }
+  .disclaimer-strip a:hover { color: var(--amber); }
+
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="flame-wrap">
+      <canvas id="flameCanvas" width="60" height="90"></canvas>
+    </div>
+    <div class="wordmark">The Candle</div>
+    <h1>Sacred Frequency Studio</h1>
+    <p class="subtitle">432 Hz · Ancient Solfeggio · Tartarian Resonance</p>
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">SILENT</span>
+    </div>
+  </div>
+
+  <!-- FREQUENCY SELECTOR -->
+  <div class="section-label">I. Select Your Root Frequency</div>
+  <div class="freq-grid" id="freqGrid"></div>
+
+  <div class="selected-display" id="selectedDisplay">
+    <span class="sel-hz">—</span>
+    <span class="sel-name">Select a frequency above</span>
+  </div>
+
+  <!-- VISUALIZER -->
+  <canvas id="vizCanvas" height="72"></canvas>
+
+  <!-- MAIN PLAY BUTTON -->
+  <div class="controls-row">
+    <div class="master-vol-wrap">
+      <span>MASTER</span>
+      <input type="range" id="masterVol" min="0" max="100" value="65">
+    </div>
+    <button class="btn-play" id="playBtn" title="Play / Pause">
+      <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <polygon points="6,4 20,12 6,20" fill="#C08030"/>
+      </svg>
+    </button>
+    <div class="master-vol-wrap">
+      <span>REVERB</span>
+      <input type="range" id="reverbMix" min="0" max="100" value="55">
+    </div>
+  </div>
+
+  <!-- LAYER CONTROLS -->
+  <div class="grid-divider"></div>
+  <div class="section-label">II. Layer Architecture</div>
+  <div class="layers-panel" id="layersPanel">
+    <!-- generated by JS -->
+  </div>
+
+  <!-- BINAURAL + WAVE TYPE -->
+  <div class="two-col">
+    <div class="panel">
+      <div class="section-label" style="margin-bottom:12px">III. Binaural Beat Offset</div>
+      <div class="binaural-row" id="binauralRow"></div>
+    </div>
+    <div class="panel">
+      <div class="section-label" style="margin-bottom:12px">IV. Waveform Character</div>
+      <div class="wave-row" id="waveRow"></div>
+    </div>
+  </div>
+
+  <!-- SUNO PROMPTS -->
+  <div class="grid-divider"></div>
+  <div class="section-label">V. Suno Composition Prompts</div>
+  <div class="suno-section">
+    <div class="suno-tabs" id="sunoTabs"></div>
+    <div id="sunoContents"></div>
+  </div>
+
+  <p class="info-note">
+    All tones generated at 432 Hz base tuning.<br>
+    Use headphones for binaural effects. Record your screen audio to capture for video use.
+  </p>
+
+</div>
+
+<!-- PERSISTENT DISCLAIMER STRIP -->
+<div class="disclaimer-strip">
+  <p>
+    This tool creates ambient sound environments for spiritual and contemplative use only.
+    Not a substitute for professional medical, psychological, or psychiatric care.
+    <span style="cursor:pointer; color:var(--amber-dim); text-decoration:underline; text-underline-offset:3px;" onclick="document.getElementById('warningModal').classList.remove('dismissed')">View full safety information.</span>
+  </p>
+</div>
+
+<!-- WARNING MODAL -->
+<div class="modal-overlay" id="warningModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-flame">&#x1F56F;</div>
+    <span class="modal-wordmark">The Candle</span>
+    <h2 id="modalTitle">Before You Begin</h2>
+
+    <div class="warning-item">
+      <span class="warning-icon">&#x1FA7A;</span>
+      <div class="warning-text"><strong>Not a substitute for medical care.</strong> These sound environments are for spiritual and contemplative use only. They are not treatment for any physical, psychological, or psychiatric condition. If you are experiencing a health crisis, please contact a qualified professional.</div>
+    </div>
+    <div class="warning-item">
+      <span class="warning-icon">&#x26A0;&#xFE0F;</span>
+      <div class="warning-text"><strong>Epilepsy &amp; seizure sensitivity.</strong> Binaural beats and rhythmic audio stimulation may trigger seizures in people with audiogenic epilepsy. If you have a seizure disorder, consult your physician before using binaural beat modes.</div>
+    </div>
+    <div class="warning-item">
+      <span class="warning-icon">&#x1F697;</span>
+      <div class="warning-text"><strong>Do not use while driving or operating machinery.</strong> These sounds are designed to induce relaxed, meditative states. Do not listen while performing tasks that require full alertness.</div>
+    </div>
+    <div class="warning-item">
+      <span class="warning-icon">&#x1F9E0;</span>
+      <div class="warning-text"><strong>Mental health sensitivity.</strong> Deeply relaxed or altered states may surface difficult emotions. If you are in acute psychological distress, use this tool with appropriate support in place.</div>
+    </div>
+    <div class="warning-item">
+      <span class="warning-icon">&#x1F50A;</span>
+      <div class="warning-text"><strong>Volume safety.</strong> Extended exposure to audio above 85 dB can cause permanent hearing damage. Keep volume comfortable. These sounds work at low levels &mdash; louder is not more effective.</div>
+    </div>
+    <div class="warning-item">
+      <span class="warning-icon">&#x1FAC3;</span>
+      <div class="warning-text"><strong>Pregnancy.</strong> Consult your healthcare provider before using binaural beats or extended low-frequency tones during pregnancy.</div>
+    </div>
+
+    <div class="modal-disclaimer">
+      The Candle and its creator make no medical, therapeutic, or healing claims regarding these sound environments.
+      All content is offered for spiritual, contemplative, and creative use only.
+      Individual experiences vary. The creator is not liable for outcomes arising from use of this tool.
+      By continuing, you acknowledge you have read and understood these notices.
+    </div>
+
+    <button class="modal-btn" id="modalAccept">I UNDERSTAND &#x2014; ENTER THE STUDIO</button>
+    <button class="modal-secondary" onclick="window.history.back()">Leave this page</button>
+  </div>
+</div>
+
+<script>
+// ─── DATA ──────────────────────────────────────────────────────────
+const FREQUENCIES = [
+  { hz: 111,   note: 'Sub',      name: 'Ancient Cell Resonance',     color: '#8B4A8B', tartarian: true },
+  { hz: 136.1, note: 'Earth OM', name: 'Schumann Ground',            color: '#5A7A4A', tartarian: true },
+  { hz: 174,   note: '',         name: 'Pain & Stress Release',       color: '#4A6A8B' },
+  { hz: 285,   note: '',         name: 'Tissue & Energy Healing',     color: '#5A8B7A' },
+  { hz: 396,   note: 'UT',       name: 'Liberation from Fear',        color: '#8B5A4A' },
+  { hz: 417,   note: 'RE',       name: 'Transmutation & Change',      color: '#7A6A3A' },
+  { hz: 432,   note: 'A',        name: 'Cosmic Harmony (432 Base)',   color: '#C08030', primary: true },
+  { hz: 528,   note: 'MI',       name: 'DNA Repair · Miracle Tone',   color: '#4A8B4A' },
+  { hz: 639,   note: 'FA',       name: 'Heart Coherence',             color: '#8B4A6A' },
+  { hz: 741,   note: 'SOL',      name: 'Awakening Intuition',         color: '#6A4A8B' },
+  { hz: 852,   note: 'LA',       name: 'Spiritual Sight',             color: '#4A6A8B' },
+  { hz: 963,   note: 'SI',       name: 'Crown · Divine Connection',   color: '#8B7A4A' },
+  { hz: 1122,  note: 'Crown+',   name: 'Tartarian Pineal Activation', color: '#7A4A8B', tartarian: true },
+  { hz: 1176,  note: 'High',     name: 'Crystalline Consciousness',   color: '#4A8B8B', tartarian: true },
+  { hz: 1296,  note: 'Celestial','name': 'Gate of Light',            color: '#8B6A4A', tartarian: true },
+];
+
+const LAYERS = [
+  { id: 'root',    label: 'Root Drone',      desc: 'Primary frequency foundation',          defaultVol: 70, defaultOn: true },
+  { id: 'octave',  label: 'Octave Above',    desc: '2× root — adds depth and breadth',      defaultVol: 35, defaultOn: true },
+  { id: 'fifth',   label: 'Perfect Fifth',   desc: '1.5× root — sacred harmonic interval',  defaultVol: 28, defaultOn: false },
+  { id: 'sub',     label: 'Sub Undertone',   desc: '½ root — grounding earth frequency',    defaultVol: 25, defaultOn: false },
+  { id: 'shimmer', label: 'High Shimmer',    desc: '4× root — ethereal overtone',           defaultVol: 15, defaultOn: false },
+];
+
+const BINAURAL_BEATS = [
+  { label: 'None',   hz: 0,    desc: 'Pure tone' },
+  { label: 'Delta',  hz: 2.5,  desc: '2.5 Hz · Deep sleep & healing' },
+  { label: 'Theta',  hz: 6,    desc: '6 Hz · Meditation & intuition' },
+  { label: 'Alpha',  hz: 10,   desc: '10 Hz · Relaxed presence' },
+];
+
+const SUNO_PROMPTS = [
+  {
+    tab: 'MORNING PRAYER',
+    prompts: [
+      {
+        label: 'Style Prompt',
+        text: `ambient sacred drone, 432hz tuning, single candlelight acoustic guitar (sparse, reverb-drenched), low bowed cello sustains, Tibetan singing bowl overtones, no percussion, no vocals, slow tempo, 12/8 feel in the stillness, warm tape saturation, cathedral reverb, golden-hour emotional color, contemplative, safe, holy — for guided morning prayer`
+      },
+      {
+        label: 'Lyrics/Mood Directive',
+        text: `No lyrics. Pure instrumental. The sound should feel like the moment just before sunrise — not hopeful yet, not dark anymore. A threshold. Something that makes a person stop moving. 8 minutes long. Fade in over 30 seconds from complete silence.`
+      }
+    ]
+  },
+  {
+    tab: 'SLEEP MEDITATION',
+    prompts: [
+      {
+        label: 'Style Prompt',
+        text: `deep sleep meditation music, 432hz base tuning, 528hz harmonic shimmer, delta binaural beats (2.5 Hz), long sustained synth pads (sine wave, extremely slow attack), sub-bass drone, rain impulse texture underneath, no melody, no rhythm, no percussion — pure tonal space, 15 minutes, volume descends in last 3 minutes to near silence`
+      },
+      {
+        label: 'Mood / Direction',
+        text: `The listener is laying down, trying to release the weight of their day. The music should feel like warm darkness — protective, not lonely. Like being held. Like God is still awake even when they are not. Let it breathe in 90-second cycles.`
+      }
+    ]
+  },
+  {
+    tab: 'STILLNESS PRACTICE',
+    prompts: [
+      {
+        label: 'Style Prompt',
+        text: `contemplative ambient, 432hz tuning, 741hz intuition frequency layer, sparse — mostly silence with brief harmonic events every 40–60 seconds, church bell harmonic tail (no attack, just the decay), very slow string pad breath, negative space is the instrument, 10 minutes, mono compatible, no stereo width processing`
+      },
+      {
+        label: 'Mood / Direction',
+        text: `This is for sitting. For people learning to be with themselves without filling the silence. The music should support silence, not replace it. Sound like the moment between breaths. Sound like waiting for something holy. Medieval monastic texture without being period music.`
+      }
+    ]
+  },
+  {
+    tab: 'SACRED READINGS',
+    prompts: [
+      {
+        label: 'Style Prompt',
+        text: `liturgical ambient, 396hz and 528hz layered drone, pipe organ harmonics (very distant, roomy), single plucked harp note every 30–45 seconds, 432hz-tuned acoustic piano (sustain pedal held, no melody — just chord decay), warm golden reverb, no rhythm, 12 minutes, voice-friendly mix (frequency gap at 200–3000hz for narration to sit inside)`
+      },
+      {
+        label: 'Mixing Note for Suno',
+        text: `This music will have a voiceover sitting on top of it. Leave space in the mids for a human voice. The music should feel like the architecture of a cathedral — present, supportive, but not competing. A frame, not a painting.`
+      }
+    ]
+  },
+  {
+    tab: 'GUIDED PRAYER',
+    prompts: [
+      {
+        label: 'Style Prompt',
+        text: `healing frequency ambient, 528hz DNA repair tone base, 639hz heart coherence harmonic layer, soft reverb-soaked acoustic guitar (one chord, barely touched), warm cello pad breath, binaural theta shimmer (6hz), emotionally warm but not sentimental, spiritually safe and enveloping, 10–12 minutes, builds very slightly in warmth at minute 6 then returns to stillness`
+      },
+      {
+        label: 'Emotional Blueprint',
+        text: `The listener is praying for healing. They may be exhausted. They may be grieving. The music should meet them there — not cheery, not mournful. Present. Like a hand on a shoulder. Ancient. Like it has always been waiting for this moment. Do not resolve into joy. Stay in the space between petition and peace.`
+      }
+    ]
+  }
+];
+
+// ─── AUDIO ENGINE ──────────────────────────────────────────────────
+let audioCtx = null;
+let masterGain, reverbNode, dryGain, wetGain;
+let oscillators = {};
+let binauralOsc = null;
+let binauralGain = null;
+let analyser;
+let isPlaying = false;
+let selectedFreq = null;
+let selectedBinaural = 0;
+let selectedWave = 'sine';
+let layerStates = {};
+let layerVolumes = {};
+
+LAYERS.forEach(l => {
+  layerStates[l.id] = l.defaultOn;
+  layerVolumes[l.id] = l.defaultVol / 100;
+});
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.65;
+
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+
+  // Simple reverb via convolver
+  const bufLen = audioCtx.sampleRate * 3;
+  const reverbBuf = audioCtx.createBuffer(2, bufLen, audioCtx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = reverbBuf.getChannelData(c);
+    for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 2.2);
+  }
+  reverbNode = audioCtx.createConvolver();
+  reverbNode.buffer = reverbBuf;
+
+  dryGain = audioCtx.createGain();
+  wetGain = audioCtx.createGain();
+  dryGain.gain.value = 0.5;
+  wetGain.gain.value = 0.5;
+
+  masterGain.connect(dryGain);
+  masterGain.connect(reverbNode);
+  reverbNode.connect(wetGain);
+  dryGain.connect(analyser);
+  wetGain.connect(analyser);
+  analyser.connect(audioCtx.destination);
+}
+
+function getLayerFreq(layerId, baseHz) {
+  switch(layerId) {
+    case 'root':    return baseHz;
+    case 'octave':  return baseHz * 2;
+    case 'fifth':   return baseHz * 1.5;
+    case 'sub':     return baseHz * 0.5;
+    case 'shimmer': return baseHz * 4;
+    default:        return baseHz;
+  }
+}
+
+function startSound() {
+  if (!selectedFreq) return;
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  stopAllOscillators();
+
+  LAYERS.forEach(layer => {
+    if (!layerStates[layer.id]) return;
+    const freq = getLayerFreq(layer.id, selectedFreq.hz);
+    if (freq < 20 || freq > 20000) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = selectedWave === 'sine' ? 'sine' : selectedWave === 'triangle' ? 'triangle' : selectedWave === 'sawtooth' ? 'sawtooth' : 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = 0;
+    gain.gain.linearRampToValueAtTime(layerVolumes[layer.id] * 0.3, audioCtx.currentTime + 2);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+    oscillators[layer.id] = { osc, gain };
+  });
+
+  // Binaural beat
+  if (selectedBinaural > 0) {
+    const beat = BINAURAL_BEATS[selectedBinaural];
+    const rightFreq = selectedFreq.hz + beat.hz;
+    binauralOsc = audioCtx.createOscillator();
+    binauralGain = audioCtx.createGain();
+    binauralOsc.type = 'sine';
+    binauralOsc.frequency.value = rightFreq;
+    binauralGain.gain.value = 0;
+    binauralGain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 2);
+    binauralOsc.connect(binauralGain);
+    binauralGain.connect(masterGain);
+    binauralOsc.start();
+  }
+
+  isPlaying = true;
+  updatePlayIcon();
+  updateStatus(true);
+}
+
+function stopSound() {
+  stopAllOscillators();
+  isPlaying = false;
+  updatePlayIcon();
+  updateStatus(false);
+}
+
+function stopAllOscillators() {
+  Object.values(oscillators).forEach(({ osc, gain }) => {
+    try {
+      gain.gain.linearRampToValueAtTime(0, audioCtx ? audioCtx.currentTime + 0.8 : 0);
+      osc.stop(audioCtx ? audioCtx.currentTime + 1 : 0);
+    } catch(e) {}
+  });
+  oscillators = {};
+  if (binauralOsc) {
+    try {
+      binauralGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+      binauralOsc.stop(audioCtx.currentTime + 1);
+    } catch(e) {}
+    binauralOsc = null;
+    binauralGain = null;
+  }
+}
+
+function togglePlay() {
+  if (isPlaying) stopSound();
+  else startSound();
+}
+
+function updatePlayIcon() {
+  const btn = document.getElementById('playBtn');
+  const icon = document.getElementById('playIcon');
+  btn.classList.toggle('playing', isPlaying);
+  if (isPlaying) {
+    icon.innerHTML = '<rect x="5" y="4" width="4" height="16" fill="#C08030"/><rect x="15" y="4" width="4" height="16" fill="#C08030"/>';
+  } else {
+    icon.innerHTML = '<polygon points="6,4 20,12 6,20" fill="#C08030"/>';
+  }
+}
+
+function updateStatus(active) {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  dot.classList.toggle('active', active);
+  text.classList.toggle('active', active);
+  if (active && selectedFreq) {
+    text.textContent = `TRANSMITTING · ${selectedFreq.hz} HZ`;
+  } else {
+    text.textContent = 'SILENT';
+  }
+}
+
+// ─── UI BUILD ──────────────────────────────────────────────────────
+function buildFreqGrid() {
+  const grid = document.getElementById('freqGrid');
+  FREQUENCIES.forEach((f, i) => {
+    const card = document.createElement('div');
+    card.className = 'freq-card';
+    card.innerHTML = `
+      <span class="freq-hz">${f.hz}</span>
+      <span class="freq-note">${f.note || ''}</span>
+      <span class="freq-name">${f.name}</span>
+    `;
+    if (f.primary) card.style.borderColor = 'rgba(192,128,48,0.5)';
+    if (f.tartarian) {
+      card.style.borderStyle = 'dashed';
+      card.title = 'Tartarian resonance frequency';
+    }
+    card.addEventListener('click', () => selectFreq(f, card));
+    grid.appendChild(card);
+  });
+}
+
+function selectFreq(f, cardEl) {
+  document.querySelectorAll('.freq-card').forEach(c => c.classList.remove('active'));
+  cardEl.classList.add('active');
+  selectedFreq = f;
+
+  const disp = document.getElementById('selectedDisplay');
+  disp.innerHTML = `<span class="sel-hz">${f.hz} Hz</span><span class="sel-name">${f.name}${f.tartarian ? ' ✦' : ''}</span>`;
+
+  if (isPlaying) startSound();
+  updateStatus(isPlaying);
+}
+
+function buildLayers() {
+  const panel = document.getElementById('layersPanel');
+  panel.innerHTML = '';
+  LAYERS.forEach(layer => {
+    const row = document.createElement('div');
+    row.className = 'layer-row';
+    row.innerHTML = `
+      <button class="layer-toggle ${layer.defaultOn ? 'on' : ''}" id="tog_${layer.id}"></button>
+      <div class="layer-info">
+        <div class="layer-title">${layer.label}</div>
+        <div class="layer-desc">${layer.desc}</div>
+      </div>
+      <div class="layer-vol">
+        <span class="vol-label">VOL</span>
+        <input type="range" min="0" max="100" value="${layer.defaultVol}" id="vol_${layer.id}">
+      </div>
+    `;
+
+    const tog = row.querySelector(`#tog_${layer.id}`);
+    tog.addEventListener('click', () => {
+      layerStates[layer.id] = !layerStates[layer.id];
+      tog.classList.toggle('on', layerStates[layer.id]);
+      if (isPlaying) startSound();
+    });
+
+    const vol = row.querySelector(`#vol_${layer.id}`);
+    vol.addEventListener('input', () => {
+      layerVolumes[layer.id] = vol.value / 100;
+      if (oscillators[layer.id]) {
+        oscillators[layer.id].gain.gain.linearRampToValueAtTime(
+          layerVolumes[layer.id] * 0.3,
+          audioCtx.currentTime + 0.1
+        );
+      }
+    });
+
+    panel.appendChild(row);
+  });
+}
+
+function buildBinaural() {
+  const row = document.getElementById('binauralRow');
+  BINAURAL_BEATS.forEach((b, i) => {
+    const el = document.createElement('div');
+    el.className = `binaural-beat ${i === 0 ? 'active' : ''}`;
+    el.innerHTML = `<div class="beat-dot"></div><span class="beat-label">${b.label}</span><span class="beat-hz">${b.hz > 0 ? b.hz + ' Hz' : ''}</span>`;
+    el.title = b.desc;
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.binaural-beat').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      selectedBinaural = i;
+      if (isPlaying) startSound();
+    });
+    row.appendChild(el);
+  });
+}
+
+function buildWaveforms() {
+  const row = document.getElementById('waveRow');
+  [
+    { id: 'sine', label: 'SINE', desc: 'Purest tone, most healing' },
+    { id: 'triangle', label: 'TRIANGLE', desc: 'Warm, soft overtones' },
+    { id: 'sawtooth', label: 'SAWTOOTH', desc: 'Rich, complex harmonics' },
+  ].forEach(w => {
+    const btn = document.createElement('button');
+    btn.className = `wave-btn ${w.id === 'sine' ? 'active' : ''}`;
+    btn.textContent = w.label;
+    btn.title = w.desc;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.wave-btn').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      selectedWave = w.id;
+      if (isPlaying) startSound();
+    });
+    row.appendChild(btn);
+  });
+}
+
+function buildSunoPrompts() {
+  const tabs = document.getElementById('sunoTabs');
+  const contents = document.getElementById('sunoContents');
+
+  SUNO_PROMPTS.forEach((section, i) => {
+    const tab = document.createElement('button');
+    tab.className = `suno-tab ${i === 0 ? 'active' : ''}`;
+    tab.textContent = section.tab;
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.suno-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.suno-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`suno-content-${i}`).classList.add('active');
+    });
+    tabs.appendChild(tab);
+
+    const content = document.createElement('div');
+    content.className = `suno-content ${i === 0 ? 'active' : ''}`;
+    content.id = `suno-content-${i}`;
+    content.innerHTML = section.prompts.map((p, pi) => `
+      <div class="prompt-box">
+        <div class="prompt-label">${p.label}</div>
+        <div class="prompt-text">${p.text}</div>
+        <button class="copy-btn" onclick="copyPrompt(this, '${encodeURIComponent(p.text)}')">COPY</button>
+      </div>
+    `).join('');
+    contents.appendChild(content);
+  });
+}
+
+function copyPrompt(btn, encoded) {
+  const text = decodeURIComponent(encoded);
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'COPIED';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// ─── MASTER VOLUME + REVERB ──────────────────────────────────────
+document.getElementById('masterVol').addEventListener('input', e => {
+  if (masterGain) masterGain.gain.linearRampToValueAtTime(e.target.value / 100, audioCtx.currentTime + 0.05);
+});
+
+document.getElementById('reverbMix').addEventListener('input', e => {
+  if (!dryGain) return;
+  const v = e.target.value / 100;
+  dryGain.gain.linearRampToValueAtTime(1 - v * 0.6, audioCtx.currentTime + 0.05);
+  wetGain.gain.linearRampToValueAtTime(v * 0.8, audioCtx.currentTime + 0.05);
+});
+
+document.getElementById('playBtn').addEventListener('click', togglePlay);
+
+// ─── FLAME CANVAS ──────────────────────────────────────────────────
+function drawFlame() {
+  const c = document.getElementById('flameCanvas');
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  let t = 0;
+
+  function frame() {
+    ctx.clearRect(0, 0, w, h);
+    t += 0.04;
+
+    const cx = w / 2;
+    const flickerX = cx + Math.sin(t * 1.3) * 3 + Math.sin(t * 2.7) * 1.5;
+    const flickerH = h * 0.82 + Math.sin(t * 1.1) * 4;
+
+    // Outer glow
+    const outerGrad = ctx.createRadialGradient(cx, h - 10, 2, cx, h * 0.4, 38);
+    outerGrad.addColorStop(0, 'rgba(255,160,40,0.18)');
+    outerGrad.addColorStop(1, 'rgba(192,80,10,0)');
+    ctx.beginPath();
+    ctx.ellipse(cx, h * 0.5, 28, 48, 0, 0, Math.PI * 2);
+    ctx.fillStyle = outerGrad;
+    ctx.fill();
+
+    // Main flame body
+    ctx.beginPath();
+    ctx.moveTo(cx, h - 4);
+    ctx.bezierCurveTo(cx - 12, h * 0.55, flickerX - 8, h * 0.3, flickerX, h - flickerH);
+    ctx.bezierCurveTo(flickerX + 8, h * 0.3, cx + 12, h * 0.55, cx, h - 4);
+    const grad = ctx.createLinearGradient(cx, h - flickerH, cx, h);
+    grad.addColorStop(0, 'rgba(255,255,240,0.95)');
+    grad.addColorStop(0.2, 'rgba(255,220,80,0.9)');
+    grad.addColorStop(0.6, 'rgba(220,100,20,0.85)');
+    grad.addColorStop(1, 'rgba(180,60,5,0.3)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Inner bright core
+    ctx.beginPath();
+    ctx.moveTo(cx, h - 6);
+    ctx.bezierCurveTo(cx - 5, h * 0.65, flickerX - 3, h * 0.42, flickerX, h - flickerH + 10);
+    ctx.bezierCurveTo(flickerX + 3, h * 0.42, cx + 5, h * 0.65, cx, h - 6);
+    const coreGrad = ctx.createLinearGradient(cx, h - flickerH + 10, cx, h - 6);
+    coreGrad.addColorStop(0, 'rgba(255,255,255,0.9)');
+    coreGrad.addColorStop(0.5, 'rgba(255,240,150,0.7)');
+    coreGrad.addColorStop(1, 'rgba(255,180,50,0.2)');
+    ctx.fillStyle = coreGrad;
+    ctx.fill();
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// ─── VISUALIZER ──────────────────────────────────────────────────
+function drawViz() {
+  const c = document.getElementById('vizCanvas');
+  const ctx = c.getContext('2d');
+  c.width = c.offsetWidth;
+  const w = c.width, h = c.height;
+
+  function frame() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#12100D';
+    ctx.fillRect(0, 0, w, h);
+
+    if (analyser && isPlaying) {
+      const buf = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteTimeDomainData(buf);
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(192,128,48,0.7)';
+      ctx.lineWidth = 1.5;
+      const step = w / buf.length;
+      buf.forEach((v, i) => {
+        const y = (v / 128) * (h / 2);
+        if (i === 0) ctx.moveTo(0, y);
+        else ctx.lineTo(i * step, y);
+      });
+      ctx.stroke();
+    } else {
+      // idle line
+      const t = Date.now() / 3000;
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(192,128,48,0.2)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x++) {
+        const y = h / 2 + Math.sin(x / w * Math.PI * 6 + t) * 2;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// ─── WARNING MODAL ───────────────────────────────────────────────
+(function() {
+  try {
+    const modal = document.getElementById('warningModal');
+    const acceptBtn = document.getElementById('modalAccept');
+    if (!modal || !acceptBtn) return;
+    acceptBtn.addEventListener('click', () => {
+      modal.classList.add('dismissed');
+    });
+  } catch(e) { console.warn('Modal init error:', e); }
+})();
+
+// ─── INIT ─────────────────────────────────────────────────────────
+buildFreqGrid();
+buildLayers();
+buildBinaural();
+buildWaveforms();
+buildSunoPrompts();
+drawFlame();
+drawViz();
+</script>
+</body>
+</html>
